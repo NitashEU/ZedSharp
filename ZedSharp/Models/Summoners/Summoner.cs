@@ -7,11 +7,11 @@ namespace ZedSharp.Models.Summoners
     public class Summoner
     {
         public int Id { get; set; }
-        public int Accountid { get; set; }
+        public int AccountId { get; set; }
         public string Name { get; set; }
-        public int Summonerlevel { get; set; }
-        public int Profileiconid { get; set; }
+        public int SummonerLevel { get; set; }
+        public int ProfileIconId { get; set; }
         [JsonConverter(typeof(UnixTimestampConverter))]
-        public DateTime Revisiondate { get; set; }
+        public DateTime RevisionDate { get; set; }
     }
 }

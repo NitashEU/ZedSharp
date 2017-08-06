@@ -13,7 +13,7 @@ namespace ZedSharp.Models.Leagues
         public int Wins { get; set; }
         public bool Veteran { get; set; }
         public int Losses { get; set; }
-        public string PlayerOrTeamId { get; set; }
+        public long PlayerOrTeamId { get; set; }
         public string PlayerOrTeamName { get; set; }
         public bool Inactive { get; set; }
         public bool FreshBlood { get; set; }
