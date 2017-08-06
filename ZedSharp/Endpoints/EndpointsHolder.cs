@@ -2,7 +2,7 @@
 
 namespace ZedSharp.Endpoints
 {
-    public class EndpointsHolder
+    internal class EndpointsHolder
     {
         public readonly string BaseUrl;
 
@@ -11,12 +11,12 @@ namespace ZedSharp.Endpoints
             BaseUrl = $"https://{platformId}.api.riotgames.com";
         }
 
-        public LeaguesEndpoint Leagues = new LeaguesEndpoint();
-        public MasterLeaguesEndpoint MasterLeagues = new MasterLeaguesEndpoint();
-        public ChallengerLeaguesEndpoint ChallengerLeagues = new ChallengerLeaguesEndpoint();
-        public SummonersEndpoint Summoners = new SummonersEndpoint();
-        public MatchesEndpoint Matches = new MatchesEndpoint();
-        public MatchlistsEndpoint Matchlists = new MatchlistsEndpoint();
-        public StaticDataEndpoint StaticData = new StaticDataEndpoint();
+        internal LeaguesEndpoint Leagues = new LeaguesEndpoint();
+        internal MasterLeaguesEndpoint MasterLeagues = new MasterLeaguesEndpoint();
+        internal ChallengerLeaguesEndpoint ChallengerLeagues = new ChallengerLeaguesEndpoint();
+        internal SummonersEndpoint Summoners = new SummonersEndpoint();
+        internal MatchesEndpoint Matches = new MatchesEndpoint();
+        internal MatchlistsEndpoint Matchlists = new MatchlistsEndpoint();
+        internal StaticDataEndpoint StaticData = new StaticDataEndpoint();
     }
 }

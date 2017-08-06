@@ -24,6 +24,6 @@ namespace ZedSharp
         public ChallengerLeaguesRequester ChallengerLeagues => new ChallengerLeaguesRequester(_endpointsHolder, _riotRequester);
         public SummonersRequester Summoners => new SummonersRequester(_endpointsHolder, _riotRequester);
         public MatchesRequester Matches => new MatchesRequester(_endpointsHolder, _riotRequester);
-        public MatchListsRequester MatchLists => new MatchListsRequester(_endpointsHolder, _riotRequester);
+        public MatchlistsRequester Matchlists => new MatchlistsRequester(_endpointsHolder, _riotRequester);
     }
 }

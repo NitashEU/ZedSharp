@@ -10,31 +10,31 @@ namespace ZedSharp.Requester
         private readonly EndpointsHolder _endpointsHolder;
         private readonly RiotRequester _riotRequester;
 
-        public SummonersRequester(EndpointsHolder endpointsHolder, RiotRequester riotRequester)
+        internal SummonersRequester(EndpointsHolder endpointsHolder, RiotRequester riotRequester)
         {
             _endpointsHolder = endpointsHolder;
             _riotRequester = riotRequester;
         }
 
-        public async Task<Summoner> GetSummonerByAccountId(long accountId)
+        public async Task<Summoner> ByAccountIdAsync(long accountId)
         {
-            return await _riotRequester.Get<Summoner>(_endpointsHolder.Summoners.ByAccountId, new
+            return await _riotRequester.GetAsync<Summoner>(_endpointsHolder.Summoners.ByAccountId, new
             {
                 accountId
             }.ToDictionary());
         }
 
-        public async Task<Summoner> GetSummonerBySummonerName(string summonerName)
+        public async Task<Summoner> BySummonerNameAsync(string summonerName)
         {
-            return await _riotRequester.Get<Summoner>(_endpointsHolder.Summoners.BySummonerName, new
+            return await _riotRequester.GetAsync<Summoner>(_endpointsHolder.Summoners.BySummonerName, new
             {
                 summonerName
             }.ToDictionary());
         }
 
-        public async Task<Summoner> GetSummonerBySummonerId(long summonerId)
+        public async Task<Summoner> BySummonerIdAsync(long summonerId)
         {
-            return await _riotRequester.Get<Summoner>(_endpointsHolder.Summoners.BySummonerId, new
+            return await _riotRequester.GetAsync<Summoner>(_endpointsHolder.Summoners.BySummonerId, new
             {
                 summonerId
             }.ToDictionary());

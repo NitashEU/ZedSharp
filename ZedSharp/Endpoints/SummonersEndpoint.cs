@@ -1,11 +1,11 @@
 ﻿namespace ZedSharp.Endpoints
 {
-    public class SummonersEndpoint
+    internal class SummonersEndpoint
     {
         private readonly string _baseUrl = "lol/summoner/v3/summoners/";
 
-        public string ByAccountId => _baseUrl + "by-account/{accountId}";
-        public string BySummonerName => _baseUrl + "by-name/{summonerName}";
-        public string BySummonerId => _baseUrl + "{summonerId}";
+        internal string ByAccountId => _baseUrl + "by-account/{accountId}";
+        internal string BySummonerName => _baseUrl + "by-name/{summonerName}";
+        internal string BySummonerId => _baseUrl + "{summonerId}";
     }
 }

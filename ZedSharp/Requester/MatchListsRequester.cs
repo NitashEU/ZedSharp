@@ -6,20 +6,20 @@ using ZedSharp.Utils;
 
 namespace ZedSharp.Requester
 {
-    public class MatchListsRequester
+    public class MatchlistsRequester
     {
         private readonly EndpointsHolder _endpointsHolder;
         private readonly RiotRequester _riotRequester;
 
-        public MatchListsRequester(EndpointsHolder endpointsHolder, RiotRequester riotRequester)
+        internal MatchlistsRequester(EndpointsHolder endpointsHolder, RiotRequester riotRequester)
         {
             _endpointsHolder = endpointsHolder;
             _riotRequester = riotRequester;
         }
 
-        public async Task<Matchlist> ByAccountId(long accountId, MatchlistByAccountIdOptions requestOptions = null)
+        public async Task<Matchlist> ByAccountIdAsync(long accountId, MatchlistByAccountIdOptions requestOptions = null)
         {
-            return await _riotRequester.Get<Matchlist>(_endpointsHolder.Matchlists.ByAccountId, new
+            return await _riotRequester.GetAsync<Matchlist>(_endpointsHolder.Matchlists.ByAccountId, new
             {
                 accountId
             }.ToDictionary(), requestOptions ?? new MatchlistByAccountIdOptions());

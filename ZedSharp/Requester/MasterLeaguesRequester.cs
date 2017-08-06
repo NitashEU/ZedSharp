@@ -11,15 +11,15 @@ namespace ZedSharp.Requester
         private readonly EndpointsHolder _endpointsHolder;
         private readonly RiotRequester _riotRequester;
 
-        public MasterLeaguesRequester(EndpointsHolder endpointsHolder, RiotRequester riotRequester)
+        internal MasterLeaguesRequester(EndpointsHolder endpointsHolder, RiotRequester riotRequester)
         {
             _endpointsHolder = endpointsHolder;
             _riotRequester = riotRequester;
         }
 
-        public async Task<LeagueList> GetMasterLeaguesByQueue(Queue queue)
+        public async Task<LeagueList> ByQueueAsync(Queue queue)
         {
-            return await _riotRequester.Get<LeagueList>(_endpointsHolder.MasterLeagues.ByQueue, new
+            return await _riotRequester.GetAsync<LeagueList>(_endpointsHolder.MasterLeagues.ByQueue, new
             {
                 queue
             }.ToDictionary());

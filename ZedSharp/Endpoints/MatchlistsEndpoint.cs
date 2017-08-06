@@ -1,10 +1,10 @@
 namespace ZedSharp.Endpoints
 {
-    public class MatchlistsEndpoint
+    internal class MatchlistsEndpoint
     {
         private readonly string _baseUrl = "lol/match/v3/matchlists/";
 
-        public string ByAccountId => _baseUrl + "by-account/{accountId}";
-        public string ByAccountIdRecent => _baseUrl + "by-account/{accountId}/recent";
+        internal string ByAccountId => _baseUrl + "by-account/{accountId}";
+        internal string ByAccountIdRecent => _baseUrl + "by-account/{accountId}/recent";
     }
 }
