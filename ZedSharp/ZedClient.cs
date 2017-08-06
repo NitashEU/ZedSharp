@@ -25,5 +25,6 @@ namespace ZedSharp
         public SummonersRequester Summoners => new SummonersRequester(_endpointsHolder, _riotRequester);
         public MatchesRequester Matches => new MatchesRequester(_endpointsHolder, _riotRequester);
         public MatchlistsRequester Matchlists => new MatchlistsRequester(_endpointsHolder, _riotRequester);
+        public StaticDataRequester StaticData => new StaticDataRequester(_endpointsHolder, _riotRequester);
     }
 }
