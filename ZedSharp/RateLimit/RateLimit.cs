@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ZedSharp.Utils;
 
 namespace ZedSharp.RateLimit
 {
@@ -18,16 +19,19 @@ namespace ZedSharp.RateLimit
             _tokenBucket = new FixedTokenBucket(max, interval);
         }
 
-        public async Task<bool> Wait(int n = 1, bool force = false)
+        public async Task<bool> WaitAsync(int n = 1, bool force = false, bool wait = true)
         {
             TimeSpan waitTime;
             bool newPeriod;
             if (_tokenBucket.ShouldThrottle(n, force, out waitTime, out newPeriod))
             {
+                if (!wait)
+                {
+                    throw new ZedException(100);
+                }
                 await Task.Delay(waitTime);
-                return await Wait(n, force);
+                return await WaitAsync(n, force);
             }
-            if (newPeriod) Console.WriteLine("NEW PERIOD: " + Seconds);
             return newPeriod;
         }
     }

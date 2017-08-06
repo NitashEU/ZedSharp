@@ -16,7 +16,7 @@ namespace ZedSharp.RateLimit
         private readonly Dictionary<string, List<RateLimit>> _methodRateLimits = new Dictionary<string, List<RateLimit>>();
         private bool _isNewPeriod = true;
 
-        public async Task WaitAll(string method)
+        public async Task WaitAllAsync(string method, bool wait = true)
         {
             _prepareMethodRateLimits(method);
 
@@ -32,61 +32,82 @@ namespace ZedSharp.RateLimit
 
             using (_headerSem.Run())
             {
-                await _waitForRateLimits(_appRateLimits);
-                await _waitForRateLimits(_methodRateLimits[method]);
-                _sem.Release();
-            }
-        }
-
-        public async Task AdjustToHeader(string method, DateTime requestDate, DateTime responseDate, Dictionary<string, string> headers)
-        {
-            using (_headerSem.Run())
-            {
-                if (headers == default(Dictionary<string, string>))
+                try
                 {
-                    return;
+                    await _waitForRateLimitsAsync(_appRateLimits, wait);
+                    await _waitForRateLimitsAsync(_methodRateLimits[method], wait);
                 }
-
-                var appRateLimit = headers[HeaderNames.AppRateLimit];
-                var methodRateLimit = headers[HeaderNames.MethodRateLimit];
-                var appRateLimitCount = headers[HeaderNames.AppRateLimitCount];
-                var methodRateLimitCount = headers[HeaderNames.MethodRateLimitCount];
-
-                var appRateLimitsAvailable = _appRateLimits.Count > 0;
-                var methodRateLimitsAvailable = _methodRateLimits[method].Count > 0;
-
-                if (!appRateLimitsAvailable)
+                finally
                 {
-                    _appRateLimits.AddRange(_getRateLimits(appRateLimit));
-                }
-
-                if (!methodRateLimitsAvailable)
-                {
-                    _methodRateLimits[method].AddRange(_getRateLimits(methodRateLimit));
-                }
-
-                await _adjustRateLimits(appRateLimitCount, _appRateLimits);
-                await _adjustRateLimits(methodRateLimitCount, _methodRateLimits[method]);
-
-                if (headers.ContainsKey(HeaderNames.RetryAfter))
-                {
-                    await _waitForRetryAfter(int.Parse(headers[HeaderNames.RetryAfter]), responseDate);
-                }
-
-                if (_sem.CurrentCount == 0 && (!appRateLimitsAvailable || !methodRateLimitsAvailable || _isNewPeriod))
-                {
-                    _isNewPeriod = false;
                     _sem.Release();
                 }
             }
         }
 
-        private async Task _waitForRateLimits(List<RateLimit> rateLimits)
+        public async Task AdjustToHeaderAsync(string method, DateTime requestDate, DateTime responseDate, Dictionary<string, string> headers, bool wait = true)
+        {
+            using (_headerSem.Run())
+            {
+                var appRateLimitsAvailable = false;
+                var methodRateLimitsAvailable = false;
+                try
+                {
+                    if (headers == default(Dictionary<string, string>))
+                    {
+                        return;
+                    }
+
+                    appRateLimitsAvailable = _appRateLimits.Count > 0;
+                    methodRateLimitsAvailable = _methodRateLimits[method].Count > 0;
+                    
+                    if (headers.ContainsKey(HeaderNames.AppRateLimit))
+                    {
+                        var appRateLimit = headers[HeaderNames.AppRateLimit];
+                        var appRateLimitCount = headers[HeaderNames.AppRateLimitCount];
+                        if (!appRateLimitsAvailable)
+                        {
+                            _appRateLimits.AddRange(_getRateLimits(appRateLimit, wait));
+                        }
+                        await _adjustRateLimitsAsync(appRateLimitCount, _appRateLimits, wait);
+                    }
+                    if (headers.ContainsKey(HeaderNames.MethodRateLimit))
+                    {
+                        var methodRateLimit = headers[HeaderNames.MethodRateLimit];
+                        var methodRateLimitCount = headers[HeaderNames.MethodRateLimitCount];
+                        if (!methodRateLimitsAvailable)
+                        {
+                            _methodRateLimits[method].AddRange(_getRateLimits(methodRateLimit, wait));
+                        }
+                        await _adjustRateLimitsAsync(methodRateLimitCount, _methodRateLimits[method], wait);
+                    }
+
+                    if (headers.ContainsKey(HeaderNames.RetryAfter))
+                    {
+                        if (!wait)
+                        {
+                            throw new ZedException(100);
+                        }
+                        await _waitForRetryAfterAsync(int.Parse(headers[HeaderNames.RetryAfter]), responseDate);
+                    }
+                }
+                finally
+                {
+                    if (_sem.CurrentCount == 0 && (!appRateLimitsAvailable || !methodRateLimitsAvailable || _isNewPeriod))
+                    {
+                        _isNewPeriod = false;
+                        _sem.Release();
+                    }
+                }
+
+            }
+        }
+
+        private async Task _waitForRateLimitsAsync(List<RateLimit> rateLimits, bool wait)
         {
             var isNewPeriod = false;
             foreach (var rl in rateLimits)
             {
-                var sub = await rl.Wait();
+                var sub = await rl.WaitAsync(1, false, wait);
                 if (!isNewPeriod && sub)
                 {
                     isNewPeriod = true;
@@ -95,7 +116,7 @@ namespace ZedSharp.RateLimit
             _isNewPeriod = isNewPeriod && !_isNewPeriod;
         }
 
-        private async Task _waitForRetryAfter(int retryAfter, DateTime responseDate)
+        private async Task _waitForRetryAfterAsync(int retryAfter, DateTime responseDate)
         {
             var now = DateTime.UtcNow.ToUnixTimeMilliseconds();
             var waitTime = retryAfter - (now - responseDate.ToUnixTimeMilliseconds()) / 1000;
@@ -105,24 +126,24 @@ namespace ZedSharp.RateLimit
             }
         }
 
-        private async Task _adjustRateLimits(string newValues, List<RateLimit> rateLimits)
+        private async Task _adjustRateLimitsAsync(string newValues, List<RateLimit> rateLimits, bool wait)
         {
             var dic = _getRateLimitsDic(newValues);
             foreach (var rl in rateLimits)
             {
                 if (dic[rl.Seconds] > rl.Max - rl.CallsLeft && rl.CallsLeft > 0 && _isNewPeriod)
                 {
-                    await rl.Wait(dic[rl.Seconds] - (rl.Max - rl.CallsLeft), true);
+                    await rl.WaitAsync(dic[rl.Seconds] - (rl.Max - rl.CallsLeft), true, wait);
                 }
             }
         }
 
-        private List<RateLimit> _getRateLimits(string rateLimit)
+        private List<RateLimit> _getRateLimits(string rateLimit, bool wait)
         {
             return _getRateLimitsDic(rateLimit).Select(kvp =>
             {
                 var rl = new RateLimit((int) (kvp.Value * 0.9), kvp.Key);
-                rl.Wait().Wait();
+                rl.WaitAsync(1, false, wait).Wait();
                 return rl;
             }).ToList();
         }
