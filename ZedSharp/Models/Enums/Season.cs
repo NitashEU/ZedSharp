@@ -11,6 +11,7 @@ namespace ZedSharp.Models.Enums
         SEASON2015 = 5,
         PRESEASON2016 = 6,
         SEASON2016 = 7,
-        PRESEASON2017 = 8
+        PRESEASON2017 = 8,
+        SEASON2017 = 9
     }
 }
